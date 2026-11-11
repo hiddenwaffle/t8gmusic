@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>That '80s Game: the soundtrack</title>
 <meta name="description" content="The soundtrack of That '80s Game: each track with a live score that follows along, and a full score to print.">
+<meta name="author" content="hiddenwaffle">
 <meta name="theme-color" content="#e9e2cf">
   <script type="module">var battle_score_default = {
 	id: "battle",
@@ -432300,8 +432301,8 @@ function setMedia() {
 	if (!("mediaSession" in navigator)) return;
 	navigator.mediaSession.metadata = new MediaMetadata({
 		title: track.title,
-		artist: "That '80s Game",
-		album: "The soundtrack"
+		artist: "hiddenwaffle",
+		album: "That '80s Game: the soundtrack"
 	});
 	const ms = navigator.mediaSession;
 	ms.setActionHandler("play", () => {
@@ -433308,6 +433309,7 @@ input[type='range']:focus-visible { outline: var(--line) solid var(--pink); outl
 .keys dt { text-align: right; }
 .keys dd { margin: 0; }
 .keys p { margin: 0 0 0.9em; font-style: italic; }
+.keys .rights { font-style: normal; font-size: 0.82em; color: var(--ink-soft); }
 
 /* A short window (an iPad on its side, a laptop): the track rows tighter, so all eleven fit over the bookmarks. */
 @media (max-height: 820px) {
@@ -433420,7 +433422,7 @@ input[type='range']:focus-visible { outline: var(--line) solid var(--pink); outl
   <header class="masthead">
     <div class="paper-name">That '80s Game</div>
     <div class="masthead-tab tab"><span>The Soundtrack</span></div>
-    <p class="dateline">Eleven tracks, each with a live score that follows along and a full score to print</p>
+    <p class="dateline">Eleven tracks by hiddenwaffle, each with a live score and a full score</p>
   </header>
 
   <nav class="views" aria-label="Views">
@@ -433542,6 +433544,7 @@ input[type='range']:focus-visible { outline: var(--line) solid var(--pink); outl
   </dl>
   <p>Tap or click a note to play from it (with the mouse, the note is ringed when the pointer is near it). Drag the live score to look along it; pinch or use the wheel to zoom. Pick up to four staves under the score to keep them in view.</p>
   <p>Right-click the live score, a bookmark, a track or the scrubber for what you can do there; on a touch screen, hold a finger still on it for a moment.</p>
+  <p class="rights">That '80s Game and its soundtrack are by hiddenwaffle. The game's licence has not been decided yet; until it is, all rights are reserved, so please ask before reusing any of it. The fonts are under the SIL Open Font License 1.1 (see OFL.txt beside this page).</p>
   <form method="dialog"><button class="act" type="submit">Close</button></form>
 </dialog>
 
