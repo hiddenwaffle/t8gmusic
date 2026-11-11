@@ -429036,7 +429036,7 @@ var town_display_default = {
 	]
 };
 //#endregion
-//#region soundtrack_player/data/playlist.json
+//#region .scratch/soundtrack_player/data/playlist.json
 var playlist_default = [
 	{
 		"id": "title",
@@ -429213,7 +429213,18 @@ var BridgeMix = class {
 	}
 };
 //#endregion
-//#region soundtrack_player/src/timeline.ts
+//#region src/audio/synth/dsp.ts
+/**
+* A small software synthesizer for the sound sketches (2026-10-02): it renders effects and music into sample
+* buffers, in the browser and in Node alike, so the same sound plays everywhere and can be measured. The game itself
+* still plays `audio.ts`'s oscillators; nothing here is used by it until the owner picks a style.
+*
+* A sound is a set of voices written into a `Mix` (stereo, with delay and reverb sends), then `finish` runs the
+* effects. Every random choice is seeded, so a render is the same each time.
+*/
+var SR = 44100;
+//#endregion
+//#region .scratch/soundtrack_player/src/timeline.ts
 /** The length of the part of the buffer that repeats. */
 var loopLength = (l) => l.bufferSec - l.loopStartSec;
 /** Seconds played from the top (unwrapped) to the pass and the time in the buffer. */
@@ -429316,7 +429327,7 @@ function barBeat(track, step) {
 	};
 }
 //#endregion
-//#region soundtrack_player/src/audio.ts
+//#region .scratch/soundtrack_player/src/audio.ts
 /**
 * The player's sound: each track rendered by the game's own synthesizer in the game's own worker
 * (src/audio/synth/gameWorker.ts, as the game's styled.ts asks it: the Console style's music), and played through the
@@ -429324,11 +429335,13 @@ function barBeat(track, step) {
 * two ends through the game's BridgeMix, the music gain at the game's default Music setting, the peak compressor and
 * the output gain. The player's volume comes after all of that, so at full volume the player sounds as the game does.
 */
-/** The game's sample rate for its renders (dsp.ts SR). */
-var RENDER_RATE = 44100;
+/** The game's sample rate for its renders (dsp.ts SR), and the rate the player's sound opens at. */
+var RENDER_RATE = SR;
 var MUSIC_GAIN = .8 * 2.8 * 10 ** (-2 / 20);
 /** The game's start time for a buffer offset: on a whole sample frame (audio.ts onFrame). */
 var onFrame = (seconds, rate) => Math.floor(seconds * rate + .5 + 1e-6) / rate;
+/** The game's time to start a source: the next whole frame of the context (audio.ts fromFrame). */
+var fromFrame = (time, rate) => Math.ceil(time * rate - 1e-6) / rate;
 var Engine = class {
 	ctx = null;
 	fade = null;
@@ -429357,7 +429370,13 @@ var Engine = class {
 	/** The context, made on the first gesture (browsers start sound only from one). */
 	context() {
 		if (this.ctx) return this.ctx;
-		const ctx = new (window.AudioContext ?? window.webkitAudioContext)();
+		const Ctx = window.AudioContext ?? window.webkitAudioContext;
+		let ctx;
+		try {
+			ctx = new Ctx({ sampleRate: RENDER_RATE });
+		} catch {
+			ctx = new Ctx();
+		}
 		const master = ctx.createGain();
 		const peaks = ctx.createDynamicsCompressor();
 		peaks.threshold.value = -6;
@@ -429558,7 +429577,7 @@ var Engine = class {
 	startAt(playedFrom) {
 		const ctx = this.context(), sound = this.sound, b = this.buffer;
 		const old = this.src, oldGain = this.srcGain;
-		const at = ctx.currentTime + .005;
+		const at = fromFrame(ctx.currentTime + .005, ctx.sampleRate);
 		const src = ctx.createBufferSource();
 		src.buffer = b;
 		src.loop = true;
@@ -429605,7 +429624,7 @@ var Engine = class {
 	}
 };
 //#endregion
-//#region soundtrack_player/src/bookmarks.ts
+//#region .scratch/soundtrack_player/src/bookmarks.ts
 var EXPORT_KIND = "That '80s Game soundtrack bookmarks";
 /** A new id, unique enough for one listener's bookmarks. */
 function newId(now = Date.now(), random = Math.random) {
@@ -429905,7 +429924,7 @@ function groupFor(share, previous, groups) {
 	return previous ?? (share < .5 ? a : b);
 }
 //#endregion
-//#region soundtrack_player/src/camera.ts
+//#region .scratch/soundtrack_player/src/camera.ts
 /** How long a page turn takes (seconds), and its easing. */
 var SLIDE_SEC = .7;
 var ease = (x) => .5 - .5 * Math.cos(Math.PI * Math.max(0, Math.min(1, x)));
@@ -430015,7 +430034,7 @@ var Camera = class {
 	}
 };
 //#endregion
-//#region soundtrack_player/src/line_map.ts
+//#region .scratch/soundtrack_player/src/line_map.ts
 /** Ticks a sixteenth, as lilypond.ts counts them. */
 var TPS = 6;
 var LineMap = class {
@@ -430123,7 +430142,7 @@ function interpolate(from, to, v) {
 	return to[lo] + (to[hi] - to[lo]) * (v - a) / (b - a || 1);
 }
 //#endregion
-//#region soundtrack_player/src/gestures.ts
+//#region .scratch/soundtrack_player/src/gestures.ts
 /** How far a press may wander and still be a tap (px), and how long it may last (ms). */
 var SLOP = {
 	mouse: 5,
@@ -430283,7 +430302,7 @@ function wheelAction(e) {
 var FLING_TAU = .33;
 var flingSpeed = (v, dt) => v * Math.exp(-dt / FLING_TAU);
 //#endregion
-//#region soundtrack_player/src/score_view.ts
+//#region .scratch/soundtrack_player/src/score_view.ts
 var INK = "#1b1a1f";
 var INK_SOFT = "#57534b";
 var PINK = "#f2267f";
@@ -431170,7 +431189,7 @@ var ScoreView = class {
 	}
 };
 //#endregion
-//#region soundtrack_player/src/menu.ts
+//#region .scratch/soundtrack_player/src/menu.ts
 /**
 * The page's own menu for a place: a right click with the mouse (or a pen's button, or Control with a click on a Mac),
 * a finger held still a moment on a touch screen, or the menu key on a focused item opens a short list of what can be
@@ -431458,7 +431477,7 @@ function menuOn(target, open, opts = {}) {
 	});
 }
 //#endregion
-//#region soundtrack_player/src/main.ts
+//#region .scratch/soundtrack_player/src/main.ts
 var playlist = playlist_default;
 var scores = /* #__PURE__ */ Object.assign({
 	"../data/battle.score.json": battle_score_default,
